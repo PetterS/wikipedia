@@ -132,6 +132,11 @@ else :
     
 n_printed = 0
 output = open(outputfilename, 'w')
+# Write header if it exists:
+if os.path.exists(headerfilename) :
+    with os.open(headerfilename,'r') as header: 
+        output.write(header.read())
+# Write list of pages
 for page in sorted_links :
     str = '#[[%s]] : [[Special:Whatlinkshere/%s|%d %s]]\n' % (page, page, number_of_links[page], options.links)
     try :

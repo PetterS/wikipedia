@@ -1,0 +1,3 @@
+Oskrivna artiklar med flest länkar från andra artiklar. Endast länkar direkt i wikitexten är medräknade, medan länkar som kommer från mallar är utelämnade.
+
+Sidan skapades från en databasdump med ett skript som finns tillgängligt på [https://github.com/PetterS/wikipedia Github] .Den ersätter [[Special:Önskade sidor]] som inte längre uppdateras.
