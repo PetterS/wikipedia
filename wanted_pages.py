@@ -14,7 +14,7 @@ import cPickle as pickle
 import xml.etree.cElementTree as ElementTree
 from bz2 import BZ2File
 import re
-from string import upper
+from string import upper, strip
 
 usage = "usage: %prog [options] database.xml.bz2"
 parser = optparse.OptionParser(usage)
@@ -106,6 +106,9 @@ if not os.path.exists(datafilename) :
                         
                     # Replace '_' with space
                     link = link.replace('_',' ')
+                    
+                    # Strip white space
+                    link = strip(link)
                     
                     # If this link is not already on this page
                     if len(link)>0 and is_page(link) and not links_on_page.has_key(link) :
