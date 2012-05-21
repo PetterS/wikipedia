@@ -144,6 +144,7 @@ else :
     
 n_printed = 0
 output = open(outputfilename, 'w')
+testo = open('testo', 'w')
 # Write header if it exists:
 if os.path.exists(headerfilename) :
     with open(headerfilename,'r') as header: 
@@ -151,10 +152,7 @@ if os.path.exists(headerfilename) :
 # Write list of pages
 for page in sorted_links :
     str = '#[[%s]] : [[Special:Whatlinkshere/%s|%d %s]]\n' % (page, page, number_of_links[page], options.links)
-    try :
-        output.write(str)
-    except UnicodeEncodeError:
-        pass
+    output.write(str.encode('utf8'))
 
     n_printed += 1
     if n_printed >= options.n_output :
