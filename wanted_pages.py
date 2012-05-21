@@ -23,13 +23,14 @@ if len(args) > 0 :
     
 datafilename = filename + '.cache'
 outputfilename = filename + '.wiki'
+headerfilename = 'header.wiki'
 
-files_prefixes = ['File;', 'Fil:', 'Bild:', 'Image:']
-def is_file(page) :
-    for prefix in files_prefixes : 
+ignored_prefixes = ['File;', 'Fil:', 'Bild:', 'Image:', 'Kategori:']
+def is_page(page) :
+    for prefix in ignored_prefixes : 
         if page.startswith(prefix) :
-            return True
-    return False
+            return False
+    return True
     
 
 if not os.path.exists(datafilename) :
@@ -57,6 +58,8 @@ if not os.path.exists(datafilename) :
             links_on_page = dict()
         elif event == 'end' and tag == 'title' :
             title = elem.text
+            # Replace '_' with ' '
+            title = title.replace('_',' ')
             elem.clear()
         elif event == 'end' and tag == 'text' :
             text = elem.text
@@ -87,9 +90,12 @@ if not os.path.exists(datafilename) :
                     # Make first character upper case
                     if len(link) > 0 :
                         link = upper(link[0]) + link[1:]
-                
+                        
+                    # Replace '_' with space
+                    link = link.replace('_',' ')
+                    
                     # If this link is not already on this page
-                    if len(link)>0 and not is_file(link) and not links_on_page.has_key(link) :
+                    if len(link)>0 and is_page(link) and not links_on_page.has_key(link) :
                         links_on_page[link] = 1
                         # Does this link exist in the dictionary?
                         if number_of_links.has_key(link) :
@@ -109,9 +115,11 @@ if not os.path.exists(datafilename) :
             
     # Remove all existing pages and pages with less than 2 links
     print 'Removing existing pages...'
-    for page, nlinks in number_of_links.items():
-        if not all_pages.has_key(page)  or nlinks <= 2:
-            del number_of_links[page]
+    items = number_of_links.items()
+    number_of_links = dict()
+    for page, nlinks in items:
+        if not all_pages.has_key(page)  and nlinks >= 2:
+            number_of_links[page] = nlinks
     
     # Create a sorted list
     print 'Sorting...'
@@ -134,7 +142,7 @@ n_printed = 0
 output = open(outputfilename, 'w')
 # Write header if it exists:
 if os.path.exists(headerfilename) :
-    with os.open(headerfilename,'r') as header: 
+    with open(headerfilename,'r') as header: 
         output.write(header.read())
 # Write list of pages
 for page in sorted_links :
