@@ -105,19 +105,25 @@ if not os.path.exists(datafilename) :
             
     print ''
             
+    # Remove all existing pages and pages with less than 2 links
+    print 'Removing existing pages...'
+    for page, nlinks in number_of_links.items():
+        if not all_pages.has_key(page)  or nlinks <= 2:
+            del number_of_links[page]
+    
+    # Create a sorted list
+    print 'Sorting...'
     sorted_links = sorted( number_of_links, key=number_of_links.get, reverse=True)
     
     # Save to cache file
     print 'Creating cache file...'
     with open(datafilename, 'wb') as f:
-        pickle.dump(all_pages,f)
         pickle.dump(number_of_links,f)
         pickle.dump(sorted_links,f)
     
 else :
     print 'Reading cache file...'
     with open(datafilename, 'rb') as f:
-        all_pages = pickle.load(f)
         number_of_links = pickle.load(f)
         sorted_links = pickle.load(f)
     
@@ -125,16 +131,13 @@ else :
 n_printed = 0
 output = open(outputfilename, 'w')
 for page in sorted_links :
-    
-    # Does this page exist?
-    if not all_pages.has_key(page) :
-        str = '#[[%s]] : [[Special:Whatlinkshere/%s|%d %s]]\n' % (page, page, number_of_links[page], options.links)
-        try :
-            output.write(str)
-        except UnicodeEncodeError:
-            print '<unicode>'
+    str = '#[[%s]] : [[Special:Whatlinkshere/%s|%d %s]]\n' % (page, page, number_of_links[page], options.links)
+    try :
+        output.write(str)
+    except UnicodeEncodeError:
+        print '<unicode>'
 
-        n_printed += 1
-        if n_printed >= options.n_output :
-            break
+    n_printed += 1
+    if n_printed >= options.n_output :
+        break
     
