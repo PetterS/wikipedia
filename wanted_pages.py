@@ -1,6 +1,7 @@
 # Petter Strandmark 2012
 
 import sys
+import optparse
 import xml.etree.cElementTree as ElementTree
 from bz2 import BZ2File
 import re
@@ -12,7 +13,7 @@ parser = optparse.OptionParser(usage)
 (options, args) = parser.parse_args() 
 
 filename = 'svwiki-20120514-pages-meta-current.xml.bz2'
-if len(args) > 0
+if len(args) > 0 :
     filename = args[0]
 
 file = BZ2File(filename,'r')
