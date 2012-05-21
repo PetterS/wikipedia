@@ -30,7 +30,7 @@ datafilename = filename + '.cache'
 outputfilename = filename + '.wiki'
 headerfilename = 'header.wiki'
 
-ignored_prefixes = ['File:', 'Fil:', 'Bild:', 'Image:', 'Kategori:']
+ignored_prefixes = ['File:', 'Fil:', 'Bild:', 'Image:', 'Kategori:', ':en:']
 def is_page(page) :
     for prefix in ignored_prefixes : 
         if page.startswith(prefix) :
