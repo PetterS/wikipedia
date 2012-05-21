@@ -155,7 +155,6 @@ else :
     
 n_printed = 0
 output = open(outputfilename, 'w')
-testo = open('testo', 'w')
 # Write header if it exists:
 if os.path.exists(headerfilename) :
     with open(headerfilename,'r') as header: 
