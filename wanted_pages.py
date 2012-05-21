@@ -31,7 +31,7 @@ outputfilename = filename + '.wiki'
 headerfilename = 'header.wiki'
 footerfilename = 'footer.wiki'
 
-ignored_prefixes = ['File:', 'Fil:', 'Bild:', 'Image:', 'Kategori:', ':src:', 'Wikt:']
+ignored_prefixes = ['File:', 'Fil:', 'Bild:', 'Image:', 'Kategori:', ':Kategori:', ':src:', 'Wikt:']
 def is_page(page) :
     for prefix in ignored_prefixes : 
         if page.startswith(prefix) :
