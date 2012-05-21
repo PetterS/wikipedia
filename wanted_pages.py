@@ -39,6 +39,8 @@ def is_page(page) :
     # Avoid interwiki links
     if len(page)>3 and page[2]==':' :
         return False
+    if len(page)>4 and page[3]==':' :
+        return False
     if len(page)>4 and page[0]==':' and page[3]==':' :
         return False
     return True
