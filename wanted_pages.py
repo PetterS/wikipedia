@@ -31,7 +31,7 @@ def is_file(page) :
     
 
 if not os.path.exists(datafilename) :
-    print 'Creating cache file...'
+    print 'Parsing XML file...'
     
     file = BZ2File(filename,'r')
 
@@ -108,13 +108,14 @@ if not os.path.exists(datafilename) :
     sorted_links = sorted( number_of_links, key=number_of_links.get, reverse=True)
     
     # Save to cache file
+    print 'Creating cache file...'
     with open(datafilename, 'wb') as f:
         pickle.dump(all_pages,f)
         pickle.dump(number_of_links,f)
         pickle.dump(sorted_links,f)
     
 else :
-    print 'Using cache file...'
+    print 'Reading cache file...'
     with open(datafilename, 'rb') as f:
         all_pages = pickle.load(f)
         number_of_links = pickle.load(f)
