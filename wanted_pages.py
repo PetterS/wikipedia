@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 # Petter Strandmark 2012
 
 import sys
@@ -12,7 +14,7 @@ from string import upper
 usage = "usage: %prog [options] database.xml.bz2"
 parser = optparse.OptionParser(usage)
 parser.add_option("-n", "--n_output", help="Number of pages to output", type=int, default=1000)
-parser.add_option("-l", "--links", help="How to translate the word 'links'", type=string, default="länkar")
+parser.add_option("-l", "--links", help="How to translate the word 'links'", type=str, default="links")
 (options, args) = parser.parse_args() 
 
 filename = 'svwiki-20120514-pages-meta-current.xml.bz2'
