@@ -29,12 +29,18 @@ if len(args) > 0 :
 datafilename = filename + '.cache'
 outputfilename = filename + '.wiki'
 headerfilename = 'header.wiki'
+footerfilename = 'footer.wiki'
 
-ignored_prefixes = ['File:', 'Fil:', 'Bild:', 'Image:', 'Kategori:', ':en:']
+ignored_prefixes = ['File:', 'Fil:', 'Bild:', 'Image:', 'Kategori:']
 def is_page(page) :
     for prefix in ignored_prefixes : 
         if page.startswith(prefix) :
             return False
+    # Avoid interwiki links
+    if len(page)>3 and page[2]==':' :
+        return False
+    if len(page)>4 and page[0]==':' and page[3]==':' :
+        return False
     return True
     
 
@@ -158,3 +164,7 @@ for page in sorted_links :
     if n_printed >= options.n_output :
         break
     
+if os.path.exists(footerfilename) :
+    with open(footerfilename,'r') as footer: 
+        output.write(footer.read())
+        
