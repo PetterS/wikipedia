@@ -1,6 +1,11 @@
 #!/usr/bin/python
 
 # Petter Strandmark 2012
+#
+# The command
+#    wanted_pages.py svwiki-20120514-pages-meta-current.xml.bz2
+# Will generate a list of the 1000 most wanted pages for that data dump
+#
 
 import sys
 import optparse
@@ -25,7 +30,7 @@ datafilename = filename + '.cache'
 outputfilename = filename + '.wiki'
 headerfilename = 'header.wiki'
 
-ignored_prefixes = ['File;', 'Fil:', 'Bild:', 'Image:', 'Kategori:']
+ignored_prefixes = ['File:', 'Fil:', 'Bild:', 'Image:', 'Kategori:']
 def is_page(page) :
     for prefix in ignored_prefixes : 
         if page.startswith(prefix) :
@@ -34,7 +39,7 @@ def is_page(page) :
     
 
 if not os.path.exists(datafilename) :
-    print 'Parsing XML file...'
+    print 'Parsing compressed XML file...'
     
     file = BZ2File(filename,'r')
 
@@ -109,26 +114,25 @@ if not os.path.exists(datafilename) :
         iterations+=1
         if iterations % 10000 == 0 :
             sys.stdout.write('\r')
-            sys.stdout.write('%d pages processed.  (%d XML events)                   ' % (len(all_pages), iterations) )
+            sys.stdout.write('%.1f MB, %d kpages processed.  (%d XML events)                   ' % (float(file.tell())/1024**2, len(all_pages)//1000, iterations) )
             
     print ''
             
     # Remove all existing pages and pages with less than 2 links
     print 'Removing existing pages...'
-    items = number_of_links.items()
-    number_of_links = dict()
-    for page, nlinks in items:
-        if not all_pages.has_key(page)  and nlinks >= 2:
-            number_of_links[page] = nlinks
+    new_number_of_links = dict()
+    for page in number_of_links.iterkeys() :
+        if not all_pages.has_key(page)  and number_of_links[page] >= 2:
+            new_number_of_links[page] = number_of_links[page]
     
     # Create a sorted list
     print 'Sorting...'
-    sorted_links = sorted( number_of_links, key=number_of_links.get, reverse=True)
+    sorted_links = sorted( new_number_of_links, key=new_number_of_links.get, reverse=True)
     
     # Save to cache file
     print 'Creating cache file...'
     with open(datafilename, 'wb') as f:
-        pickle.dump(number_of_links,f)
+        pickle.dump(new_number_of_links,f)
         pickle.dump(sorted_links,f)
     
 else :
@@ -150,7 +154,7 @@ for page in sorted_links :
     try :
         output.write(str)
     except UnicodeEncodeError:
-        print '<unicode>'
+        pass
 
     n_printed += 1
     if n_printed >= options.n_output :
