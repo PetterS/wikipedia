@@ -125,7 +125,7 @@ for page in sorted_links :
     
     # Does this page exist?
     if not all_pages.has_key(page) :
-        str = '[[%s]] : %d links\n' % (page, number_of_links[page])
+        str = '#[[%s]] : %d links\n' % (page, number_of_links[page])
         try :
             output.write(str)
         except UnicodeEncodeError:
