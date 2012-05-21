@@ -7,7 +7,6 @@ import cPickle as pickle
 import xml.etree.cElementTree as ElementTree
 from bz2 import BZ2File
 import re
-import operator
 from string import upper
 
 usage = "usage: %prog [options] database.xml.bz2"
@@ -19,7 +18,15 @@ if len(args) > 0 :
     filename = args[0]
     
 datafilename = filename + '.cache'
+outputfilename = filename + '.wiki'
 
+files_prefixes = ['File;', 'Fil:', 'Bild:', 'Image:']
+def is_file(page) :
+    for prefix in files_prefixes : 
+        if page.startswith(prefix) :
+            return True
+    return False
+    
 
 if not os.path.exists(datafilename) :
     print 'Creating cache file...'
@@ -67,13 +74,18 @@ if not os.path.exists(datafilename) :
                     p = link.find('|') 
                     if p >= 0 : 
                         link = link[:p]
-                
-                    # First character upper case
+                    
+                    # Does the link contain a '#'?
+                    p = link.find('#') 
+                    if p >= 0 : 
+                        link = link[:p]
+
+                    # Make first character upper case
                     if len(link) > 0 :
                         link = upper(link[0]) + link[1:]
                 
                     # If this link is not already on this page
-                    if not links_on_page.has_key(link) :
+                    if len(link)>0 and not is_file(link) and not links_on_page.has_key(link) :
                         links_on_page[link] = 1
                         # Does this link exist in the dictionary?
                         if number_of_links.has_key(link) :
@@ -87,7 +99,7 @@ if not os.path.exists(datafilename) :
         iterations+=1
         if iterations % 10000 == 0 :
             sys.stdout.write('\r')
-            sys.stdout.write('%d pages processed.  (%d XML events)            ' % (len(all_pages), iterations) )
+            sys.stdout.write('%d pages processed.  (%d XML events)                   ' % (len(all_pages), iterations) )
             
     print ''
             
@@ -107,14 +119,19 @@ else :
         sorted_links = pickle.load(f)
     
     
-for i in range(100) :
-    page = sorted_links[i]
+n_printed = 0
+output = open(outputfilename, 'w')
+for page in sorted_links :
     
     # Does this page exist?
     if not all_pages.has_key(page) :
+        str = '[[%s]] : %d links\n' % (page, number_of_links[page])
         try :
-            print page,
+            output.write(str)
         except UnicodeEncodeError:
-            print '<unicode>',
-        print ':', number_of_links[page]
+            print '<unicode>'
+
+        n_printed += 1
+        if n_printed >= 1000 :
+            break
     
