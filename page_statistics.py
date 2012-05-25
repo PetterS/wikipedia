@@ -3,8 +3,9 @@
 # Petter Strandmark 2012
 #
 # The command
-#    wanted_pages.py svwiki-20120514-pages-meta-current.xml.bz2
+#    page_statistics.py svwiki-20120514-pages-meta-current.xml.bz2
 # Will generate a list of the 1000 most wanted pages for that data dump
+# and a list of pages without any links
 #
 
 import sys
@@ -19,6 +20,7 @@ from string import upper, strip
 usage = "usage: %prog [options] database.xml.bz2"
 parser = optparse.OptionParser(usage)
 parser.add_option("-n", "--n_output", help="Number of pages to output", type=int, default=1000)
+parser.add_option("-x", "--limit", help="Limit the number of articles (debug)", type=int, default=-1)
 parser.add_option("-l", "--links", help="How to translate the word 'links'", type=str, default="links")
 (options, args) = parser.parse_args() 
 
@@ -27,9 +29,10 @@ if len(args) > 0 :
     filename = args[0]
     
 datafilename = filename + '.cache'
-outputfilename = filename + '.wiki'
-headerfilename = 'header.wiki'
-footerfilename = 'footer.wiki'
+wantedpagesfilename = filename + '.wanted.wiki'
+nolinkpagesfilename = filename + '-nolink.wiki'
+headerfilename = '.header.wiki'
+footerfilename = '.footer.wiki'
 
 ignored_prefixes = ['File:', 'Fil:', 'Bild:', 'Image:', 'Kategori:', ':Kategori:', ':src:', 'Wikt:']
 def is_page(page) :
@@ -44,7 +47,6 @@ def is_page(page) :
     if len(page)>4 and page[0]==':' and page[3]==':' :
         return False
     return True
-    
 
 if not os.path.exists(datafilename) :
     print 'Parsing compressed XML file...'
@@ -54,6 +56,7 @@ if not os.path.exists(datafilename) :
     wikilink = re.compile(r'\[\[(.*?)\]\]')
 
     all_pages = dict()
+    nolink_pages = list()
     number_of_links = dict()
 
     iterations = 0
@@ -89,6 +92,7 @@ if not os.path.exists(datafilename) :
             if ns == '0':
                 #Extract everything between [[ ]] tags
                 links = wikilink.findall(text)
+                this_page_has_link = False
                 for link in links :
                     # Does the link contain a '|'?
                     p = link.find('|') 
@@ -110,7 +114,11 @@ if not os.path.exists(datafilename) :
                     # Strip white space
                     link = strip(link)
                     
-                    # If this link is not already on this page
+                    # Is it still a valid link?
+                    if len(link) > 0 :
+                        this_page_has_link = True
+                    
+                    # If this link is a link to a page and not already on this page
                     if len(link)>0 and is_page(link) and not links_on_page.has_key(link) :
                         links_on_page[link] = 1
                         # Does this link exist in the dictionary?
@@ -119,6 +127,9 @@ if not os.path.exists(datafilename) :
                         else :
                             number_of_links[link] = 1
                 
+                if not this_page_has_link:
+                    nolink_pages.append(title)
+                
             elem.clear()
             
         # Print some progress every now and then
@@ -126,6 +137,8 @@ if not os.path.exists(datafilename) :
         if iterations % 10000 == 0 :
             sys.stdout.write('\r')
             sys.stdout.write('%.1f MB, %d kpages processed.  (%d XML events)                   ' % (float(file.tell())/1024**2, len(all_pages)//1000, iterations) )
+            if options.limit > 0 and len(all_pages) >= options.limit :
+                break
             
     print ''
             
@@ -145,20 +158,28 @@ if not os.path.exists(datafilename) :
     with open(datafilename, 'wb') as f:
         pickle.dump(new_number_of_links,f)
         pickle.dump(sorted_links,f)
+        pickle.dump(nolink_pages, f)
     
 else :
     print 'Reading cache file...'
     with open(datafilename, 'rb') as f:
         number_of_links = pickle.load(f)
         sorted_links = pickle.load(f)
+        nolink_pages = pickle.load(f)
     
     
+    
+def add_file_to_file(output, filename_to_add) :
+    if os.path.exists(filename_to_add) :
+        with open(filename_to_add,'r') as f: 
+            output.write(f.read())
+    
+#
+# Wanted pages
+#
 n_printed = 0
-output = open(outputfilename, 'w')
-# Write header if it exists:
-if os.path.exists(headerfilename) :
-    with open(headerfilename,'r') as header: 
-        output.write(header.read())
+output = open(wantedpagesfilename, 'w')
+add_file_to_file(output, 'wantedpages' + headerfilename)
 # Write list of pages
 for page in sorted_links :
     str = '#[[%s]]: [[Special:Whatlinkshere/%s|%d %s]]\n' % (page, page, number_of_links[page], options.links)
@@ -167,8 +188,18 @@ for page in sorted_links :
     n_printed += 1
     if n_printed >= options.n_output :
         break
-    
-if os.path.exists(footerfilename) :
-    with open(footerfilename,'r') as footer: 
-        output.write(footer.read())
         
+add_file_to_file(output, 'wantedpages' + footerfilename)
+output.close()
+
+#
+# Pages with no links
+#
+output = open(nolinkpagesfilename, 'w')
+add_file_to_file(output, 'nolinkpages' + headerfilename)
+for page in nolink_pages :
+    str = '#[[%s]]  \n' % (page, )
+    output.write( str.encode('utf8') )
+add_file_to_file(output, 'nolinkpages' + footerfilename)
+
+print nolink_pages

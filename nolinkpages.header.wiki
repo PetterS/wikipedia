@@ -1,0 +1,4 @@
+Detta är en lista över artiklar som inte har några länkar till andra artiklar.
+
+Sidan skapades från en databasdump ([http://dumps.wikimedia.org/svwiki/latest/svwiki-latest-pages-meta-current.xml.bz2 latest-pages-meta-current] från [http://dumps.wikimedia.org/svwiki/latest/ latest]) med ett skript som finns tillgängligt på [https://github.com/PetterS/wikipedia Github]. Den ersätter [[Special:Sidor utan länkar]] som inte längre uppdateras.
+
