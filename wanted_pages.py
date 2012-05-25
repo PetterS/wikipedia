@@ -161,7 +161,7 @@ if os.path.exists(headerfilename) :
         output.write(header.read())
 # Write list of pages
 for page in sorted_links :
-    str = '#[[%s]] : [[Special:Whatlinkshere/%s|%d %s]]\n' % (page, page, number_of_links[page], options.links)
+    str = '#[[%s]]: [[Special:Whatlinkshere/%s|%d %s]]\n' % (page, page, number_of_links[page], options.links)
     output.write(str.encode('utf8'))
 
     n_printed += 1
